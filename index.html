@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Panel Evaluation Form — CMP</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--p:#6264A7;--pd:#464775;--ok:#2e7d32;--warn:#f57f17;
+      --border:rgba(0,0,0,.11);--bg:#f4f4f6;--s:#fff;--s2:#f9f9fb;--t2:#555;--t3:#999;--r:8px;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1a1a1a;min-height:100vh;padding:2rem 1rem 4rem;}
+.wrap{max-width:740px;margin:0 auto;}
+.fh{background:var(--p);color:#fff;border-radius:var(--r) var(--r) 0 0;padding:1.5rem 1.75rem 1.25rem;}
+.fh h1{font-size:21px;font-weight:600;margin-bottom:4px;}
+.fh p{font-size:12px;opacity:.82;}
+.fhb{height:7px;background:linear-gradient(90deg,#A855F7,#6264A7,#38BDF8);margin-bottom:1.25rem;}
+.nav-tabs{display:flex;border-bottom:2px solid var(--p);margin-bottom:1rem;}
+.ntab{padding:9px 20px;font-size:12px;font-weight:500;color:var(--t2);background:transparent;border:none;cursor:pointer;font-family:inherit;border-bottom:3px solid transparent;margin-bottom:-2px;}
+.ntab.active{color:var(--p);border-bottom-color:var(--p);font-weight:600;}
+.ntab:hover:not(.active){color:#1a1a1a;}
+.view{display:none;}.view.active{display:block;}
+
+/* ── QR banner ── */
+.qr-banner{display:none;align-items:center;gap:12px;background:#e8f5e9;border:.5px solid #a5d6a7;
+  border-radius:var(--r);padding:.875rem 1.25rem;margin-bottom:10px;font-size:13px;color:#1b5e20;line-height:1.5;}
+.qr-banner svg{flex-shrink:0;}
+
+/* ── Step cards ── */
+.card{background:var(--s);border:.5px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
+.card-hdr{padding:.8rem 1.25rem;border-bottom:.5px solid var(--border);font-size:13px;font-weight:600;
+  display:flex;align-items:center;gap:8px;background:rgba(98,100,167,.03);}
+.card-hdr svg{color:var(--p);}
+.card-body{padding:.875rem 1.25rem;}
+
+/* ── Panelist dropdown ── */
+.prow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.plabel{font-size:13px;font-weight:500;white-space:nowrap;}
+.psel{flex:1;min-width:180px;max-width:320px;border:1.5px solid rgba(0,0,0,.18);border-radius:var(--r);
+  padding:9px 12px;font-size:14px;font-weight:500;font-family:inherit;color:#1a1a1a;background:var(--s);cursor:pointer;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236264A7' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;}
+.psel:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px rgba(98,100,167,.15);}
+.psel:disabled{background-color:var(--s2);color:var(--t3);cursor:not-allowed;}
+
+/* ── Presenter focus card ── */
+.pres-card{background:var(--s);border:.5px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px;}
+.pres-hdr{display:flex;align-items:center;gap:10px;padding:.875rem 1.25rem;border-bottom:.5px solid var(--border);background:rgba(98,100,167,.04);}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--p);color:#fff;font-size:14px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pname{font-size:15px;font-weight:600;margin:0 0 2px;}
+.pid{font-size:11px;color:var(--t2);}
+.already-rated{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;
+  background:#e8f5e9;color:#2e7d32;border:.5px solid #a5d6a7;margin-left:auto;}
+
+/* ── Sections ── */
+.sec{display:flex;align-items:center;border-bottom:.5px solid var(--border);}
+.sec:last-of-type{border-bottom:none;}
+.sinfo{flex:1;padding:.875rem 1rem .875rem 1.25rem;}
+.stitle{font-size:13px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:6px;}
+.stitle svg{color:var(--p);flex-shrink:0;}
+.sdesc{font-size:11px;color:var(--t2);line-height:1.4;}
+.sinp{flex:0 0 190px;padding:.75rem 1rem .75rem 0;display:flex;align-items:center;gap:8px;}
+.wb{background:var(--p);color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;}
+.ni{width:66px;border:1px solid rgba(0,0,0,.18);border-radius:var(--r);padding:7px 6px;font-size:19px;font-weight:600;
+  font-family:inherit;color:#1a1a1a;background:var(--s);text-align:center;-moz-appearance:textfield;}
+.ni::-webkit-outer-spin-button,.ni::-webkit-inner-spin-button{-webkit-appearance:none;}
+.ni:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px rgba(98,100,167,.15);}
+.ni:disabled{background:var(--s2);color:var(--t3);cursor:not-allowed;}
+.mlbl{font-size:11px;color:var(--t3);white-space:nowrap;}
+.btrack{width:48px;height:5px;background:#e8e8f0;border-radius:3px;overflow:hidden;}
+.bfill{height:100%;background:var(--p);border-radius:3px;transition:width .2s;}
+
+.sfoot{display:flex;align-items:center;padding:.75rem 1.25rem;background:var(--s2);border-top:.5px solid var(--border);}
+.stotal{font-size:20px;font-weight:700;color:var(--p);margin-left:auto;}
+.stotal span{font-size:12px;color:var(--t3);font-weight:400;}
+.nwrap{padding:.5rem 1.25rem .75rem;background:var(--s2);border-top:.5px solid var(--border);}
+.nwrap label{font-size:11px;color:var(--t2);display:block;margin-bottom:3px;}
+.nwrap textarea{width:100%;border:.5px solid rgba(0,0,0,.16);border-radius:var(--r);padding:6px 10px;
+  font-size:12px;font-family:inherit;resize:vertical;min-height:40px;color:#1a1a1a;background:var(--s);}
+.nwrap textarea:focus{outline:none;border-color:var(--p);}
+.nwrap textarea:disabled{background:var(--s2);color:var(--t3);cursor:not-allowed;}
+
+/* ── Status bar ── */
+.sbar{background:var(--s);border:.5px solid var(--border);border-radius:var(--r);
+  padding:.7rem 1.25rem;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.pill{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;}
+.pill-w{background:#f3f4f6;color:var(--t3);border:.5px solid var(--border);}
+.pill-g{background:#fff8e1;color:var(--warn);border:.5px solid #ffcc02;}
+.pill-d{background:#e8f5e9;color:var(--ok);border:.5px solid #a5d6a7;}
+.sbar-txt{font-size:12px;color:var(--t2);}
+.prog-wrap{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.prog-track{width:110px;height:6px;background:#e8e8f0;border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--p);border-radius:3px;transition:width .3s;}
+.prog-lbl{font-size:11px;color:var(--t2);white-space:nowrap;}
+
+/* ── Actions ── */
+.arow{display:flex;justify-content:flex-end;gap:8px;margin-top:4px;flex-wrap:wrap;}
+.btn-save{background:var(--p);color:#fff;border:none;padding:10px 26px;border-radius:5px;
+  font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+.btn-save:hover{background:var(--pd);}
+.btn-save:disabled{opacity:.4;cursor:not-allowed;}
+.btn-clr{background:transparent;color:var(--t2);border:.5px solid rgba(0,0,0,.18);
+  padding:9px 16px;border-radius:5px;font-size:12px;cursor:pointer;font-family:inherit;}
+.btn-clr:hover{background:var(--s2);}
+.btn-done{background:var(--ok);color:#fff;border:none;padding:10px 26px;border-radius:5px;
+  font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:none;}
+.btn-done:hover{background:#1b5e20;}
+
+/* ── Results ── */
+.res-card{background:var(--s);border:.5px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:12px;}
+.res-hdr{background:var(--p);color:#fff;padding:.65rem 1.25rem;font-size:12px;font-weight:500;
+  display:flex;align-items:center;justify-content:space-between;}
+.tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.tbl th{padding:8px 10px;text-align:left;font-size:10px;font-weight:600;color:var(--t2);
+  text-transform:uppercase;letter-spacing:.05em;border-bottom:.5px solid var(--border);background:var(--s2);}
+.tbl td{padding:8px 10px;border-bottom:.5px solid var(--border);color:#1a1a1a;}
+.tbl tr:last-child td{border-bottom:none;}
+.avg-row td{font-weight:700;color:var(--p);background:rgba(98,100,167,.05);}
+.rbadge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+  border-radius:50%;background:var(--p);color:#fff;font-size:11px;font-weight:700;}
+.rbadge.gold{background:#f4b400;color:#333;}
+.rbadge.silver{background:#9e9e9e;}
+.rbadge.bronze{background:#a0522d;}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.chip{font-size:11px;padding:3px 10px;border-radius:20px;
+  background:rgba(98,100,167,.1);border:.5px solid rgba(98,100,167,.3);color:var(--p);}
+.res-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:10px;}
+.btn-exp{background:var(--p);color:#fff;border:none;padding:9px 20px;border-radius:5px;
+  font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+.btn-exp:hover{background:var(--pd);}
+.btn-del{background:transparent;color:#c0392b;border:.5px solid #e0b0b0;padding:8px 14px;
+  border-radius:5px;font-size:13px;cursor:pointer;font-family:inherit;}
+.btn-del:hover{background:#fff0f0;}
+.empty{text-align:center;padding:3rem 1.25rem;color:var(--t2);font-size:13px;
+  background:var(--s);border:.5px solid var(--border);border-radius:var(--r);}
+
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;
+  padding:11px 22px;border-radius:6px;font-size:13px;opacity:0;transition:opacity .3s;
+  pointer-events:none;z-index:999;white-space:nowrap;}
+.toast.show{opacity:1;}
+@media(max-width:600px){
+  .sec{flex-direction:column;align-items:flex-start;}
+  .sinp{padding:0 1.25rem 1rem;}
+  .psel{max-width:100%;width:100%;}
+}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+<div class="wrap">
+
+<div class="fh">
+  <h1>Panel Evaluation Form — CMP</h1>
+  <p>S1: 1–40 pts · S2: 1–30 pts · S3: 1–30 pts · Total: 100 pts · Scan a presenter QR to begin</p>
+</div>
+<div class="fhb"></div>
+
+<div class="nav-tabs">
+  <button class="ntab active" id="ntabScore"   onclick="switchView('score')">&#9998; Score entry</button>
+  <button class="ntab"        id="ntabResults" onclick="switchView('results')">&#9646; Results</button>
+</div>
+
+<!-- ═══ SCORE VIEW ═══ -->
+<div id="viewScore" class="view active">
+
+  <!-- QR banner: only shown when ?p= param detected -->
+  <div id="qr-banner" class="qr-banner">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+      <path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+      <rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/>
+      <rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/>
+    </svg>
+    <div>
+      Scoring <strong id="qr-pname"></strong>. Select your panelist name below, fill in the scores, and click <strong>Save score</strong>.
+      Then scan the next presenter’s QR code to continue.
+    </div>
+  </div>
+
+  <!-- Step 1: Select panelist -->
+  <div class="card">
+    <div class="card-hdr">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+      </svg>
+      Step 1 — Select panelist
+    </div>
+    <div class="card-body">
+      <div class="prow">
+        <span class="plabel">Who is grading now?</span>
+        <select id="psel" class="psel" onchange="onPanelistChange()">
+          <option value="">— Select panelist —</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="sbar">
+    <span class="pill pill-w" id="spill">Waiting</span>
+    <span class="sbar-txt" id="stxt">Select a panelist to begin</span>
+    <div class="prog-wrap">
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      <span class="prog-lbl" id="prog-lbl">0 / 15</span>
+    </div>
+  </div>
+
+  <!-- Step 2: Presenter score form -->
+  <div class="pres-card" id="pres-card" data-idx="0">
+    <div class="pres-hdr">
+      <div class="avatar" id="pres-avatar">?</div>
+      <div>
+        <div class="pname" id="pres-name">—</div>
+        <div class="pid"   id="pres-id">Scan a QR code or select a panelist above</div>
+      </div>
+      <span class="already-rated" id="already-rated" style="display:none">✓ Already rated</span>
+    </div>
+
+    <!-- Section 1 -->
+    <div class="sec">
+      <div class="sinfo">
+        <div class="stitle">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18h6"/><path d="M10 22h4"/>
+            <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/>
+          </svg>
+          Section 1 — Solution quality &amp; innovation
+        </div>
+        <div class="sdesc">Problem understanding, feasibility, business impact, originality</div>
+      </div>
+      <div class="sinp">
+        <span class="wb">1–40</span>
+        <input type="number" class="ni" id="sA" min="1" max="40" placeholder="—"
+          oninput="hi('sA',40,'bA')" onblur="hb('sA',40,'bA')" disabled/>
+        <span class="mlbl">/40</span>
+        <div class="btrack"><div class="bfill" id="bA"></div></div>
+      </div>
+    </div>
+
+    <!-- Section 2 -->
+    <div class="sec">
+      <div class="sinfo">
+        <div class="stitle">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+          </svg>
+          Section 2 — Technical execution
+        </div>
+        <div class="sdesc">Architecture, working demo, correct use of Microsoft security stack</div>
+      </div>
+      <div class="sinp">
+        <span class="wb">1–30</span>
+        <input type="number" class="ni" id="sB" min="1" max="30" placeholder="—"
+          oninput="hi('sB',30,'bB')" onblur="hb('sB',30,'bB')" disabled/>
+        <span class="mlbl">/30</span>
+        <div class="btrack"><div class="bfill" id="bB"></div></div>
+      </div>
+    </div>
+
+    <!-- Section 3 -->
+    <div class="sec">
+      <div class="sinfo">
+        <div class="stitle">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          Section 3 — Presentation &amp; communication
+        </div>
+        <div class="sdesc">Clarity, team coordination, Q&amp;A handling</div>
+      </div>
+      <div class="sinp">
+        <span class="wb">1–30</span>
+        <input type="number" class="ni" id="sC" min="1" max="30" placeholder="—"
+          oninput="hi('sC',30,'bC')" onblur="hb('sC',30,'bC')" disabled/>
+        <span class="mlbl">/30</span>
+        <div class="btrack"><div class="bfill" id="bC"></div></div>
+      </div>
+    </div>
+
+    <div class="sfoot">
+      <span style="font-size:11px;color:var(--t2)">Total score</span>
+      <span class="stotal" id="stotal">—<span> / 100 pts</span></span>
+    </div>
+    <div class="nwrap">
+      <label>Notes (optional)</label>
+      <textarea id="notes" rows="2" placeholder="Comments for this presenter…" disabled></textarea>
+    </div>
+  </div>
+
+  <div class="arow">
+    <button class="btn-clr" onclick="clearFields()">Clear</button>
+    <button class="btn-save" id="btn-save" onclick="saveScore()" disabled>Save score</button>
+    <button class="btn-done" id="btn-done" onclick="submitAll()">✓ Done — Submit all scores</button>
+  </div>
+
+</div><!-- /viewScore -->
+
+<!-- ═══ RESULTS VIEW ═══ -->
+<div id="viewResults" class="view">
+  <div id="res-content">
+    <div class="empty">No completed submissions yet.</div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+<script>
+
+var PRESENTERS = ["jacob.duldulao", "matthew.a.kitan", "ser.alec.m.medrano", "reuben.andrade", "bonn.joshua.vallano", "darrell.cloma", "marc.polo.romero", "stephanie.a.basilio", "jericho.james.guanga", "nelle.v.san.pedro", "josh.reyes", "don.ramon.aquino", "carlos.rafael.pabia", "hans.harvey.santos", "vynz.alfred.raynes"];
+var DISPLAY    = ["Jacob Duldulao", "Matthew A. Kitan", "Ser Alec M. Medrano", "Reuben Andrade", "Bonn Joshua Vallano", "Darrell Cloma", "Marc Polo Romero", "Stephanie A. Basilio", "Jericho James Guanga", "Nelle V. San Pedro", "Josh Reyes", "Don Ramon Aquino", "Carlos Rafael Pabia", "Hans Harvey Santos", "Vynz Alfred Raynes"];
+var PANELISTS  = ["Panelist 1", "Panelist 2", "Panelist 3", "Panelist 4", "Panelist 5"];
+var NUM = PRESENTERS.length;
+
+// ── Store: scores[panelist][presIdx] = {A,B,C,total,notes,ts}
+// ── submitted[panelist] = true when all NUM saved and confirmed
+var scores    = {};
+var submitted = {};
+var activePan = '';   // currently selected panelist
+var focusIdx  = -1;   // presenter index locked from QR (-1 = none)
+
+// ── Persist ──────────────────────────────────────────────────────────
+function persist() {
+  try {
+    localStorage.setItem('cmp_scores',    JSON.stringify(scores));
+    localStorage.setItem('cmp_submitted', JSON.stringify(submitted));
+  } catch(e) {}
+}
+function restore() {
+  try {
+    var s  = localStorage.getItem('cmp_scores');
+    var sb = localStorage.getItem('cmp_submitted');
+    if (s)  scores    = JSON.parse(s);
+    if (sb) submitted = JSON.parse(sb);
+  } catch(e) {}
+  PANELISTS.forEach(function(p){ scores[p] = scores[p] || {}; });
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────
+function toast(msg, dur) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, dur || 3000);
+}
+function switchView(v) {
+  ['score','results'].forEach(function(x){
+    var cap = x[0].toUpperCase()+x.slice(1);
+    document.getElementById('view'+cap).classList.toggle('active', x===v);
+    document.getElementById('ntab'+cap).classList.toggle('active', x===v);
+  });
+  if (v === 'results') renderResults();
+}
+function gv(id) {
+  var el = document.getElementById(id);
+  if (!el || el.value === '') return null;
+  var v = parseInt(el.value); return isNaN(v) ? null : v;
+}
+function hi(id, max, bar) {
+  var el = document.getElementById(id), v = parseInt(el.value);
+  if (!isNaN(v)) {
+    if (v > max){ el.value=max; v=max; } if (v < 1){ el.value=1; v=1; }
+    document.getElementById(bar).style.width = Math.round(v/max*100)+'%';
+  } else { document.getElementById(bar).style.width='0%'; }
+  updateTotal();
+}
+function hb(id, max, bar) {
+  var el=document.getElementById(id); if(!el.value) return;
+  var v=parseInt(el.value);
+  if(isNaN(v)||v<1){el.value=1;v=1;} if(v>max){el.value=max;v=max;}
+  document.getElementById(bar).style.width = Math.round(v/max*100)+'%';
+  updateTotal();
+}
+function updateTotal() {
+  var a=gv('sA'),b=gv('sB'),c=gv('sC'), el=document.getElementById('stotal');
+  el.innerHTML = (a!==null||b!==null||c!==null)
+    ? ((a||0)+(b||0)+(c||0))+'<span> / 100 pts</span>'
+    : '\u2014<span> / 100 pts</span>';
+}
+function avg(arr) {
+  return arr.length ? Math.round(arr.reduce(function(a,b){return a+b;},0)/arr.length*100)/100 : null;
+}
+
+// ── Panelist dropdown ─────────────────────────────────────────────────
+function buildDropdown() {
+  var sel = document.getElementById('psel'), cur = sel.value;
+  sel.innerHTML = '<option value="">\u2014 Select panelist \u2014</option>';
+  PANELISTS.forEach(function(name) {
+    var opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name + (submitted[name] ? ' \u2713 (done)' : '');
+    sel.appendChild(opt);
+  });
+  if (cur) sel.value = cur;
+}
+function onPanelistChange() {
+  var name = document.getElementById('psel').value;
+  activePan = name;
+  if (!name) { updateStatusBar(); loadPresenter(); return; }
+  scores[name] = scores[name] || {};
+  document.getElementById('psel').disabled = !!submitted[name];
+  // If QR locked a presenter, show that one; otherwise show first unrated
+  if (focusIdx >= 0) {
+    loadPresenter(focusIdx);
+  } else {
+    // show first unrated, or first if all rated
+    var first = findNextUnrated(-1);
+    loadPresenter(first >= 0 ? first : 0);
+  }
+  updateStatusBar();
+  checkDoneButton();
+}
+
+// ── Presenter focus ───────────────────────────────────────────────────
+function loadPresenter(idx) {
+  if (idx === undefined || idx === null) idx = focusIdx >= 0 ? focusIdx : 0;
+  var el_name = document.getElementById('pres-name');
+  var el_id   = document.getElementById('pres-id');
+  var el_av   = document.getElementById('pres-avatar');
+  var el_rated= document.getElementById('already-rated');
+
+  if (!activePan) {
+    el_name.textContent = '\u2014';
+    el_id.textContent   = 'Select a panelist above';
+    el_av.textContent   = '?';
+    el_rated.style.display = 'none';
+    setInputsLocked(true);
+    clearFields();
+    return;
+  }
+
+  var ini = DISPLAY[idx].split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+  el_av.textContent   = ini;
+  el_name.textContent = DISPLAY[idx];
+  el_id.textContent   = PRESENTERS[idx];
+
+  // Remember which presenter is showing
+  document.getElementById('pres-card').dataset.idx = idx;
+
+  var locked = !!submitted[activePan];
+  setInputsLocked(locked);
+  clearFields();
+
+  var saved = scores[activePan] && scores[activePan][idx];
+  if (saved) {
+    document.getElementById('sA').value = saved.A;
+    document.getElementById('sB').value = saved.B;
+    document.getElementById('sC').value = saved.C;
+    document.getElementById('notes').value = saved.notes || '';
+    document.getElementById('bA').style.width = Math.round(saved.A/40*100)+'%';
+    document.getElementById('bB').style.width = Math.round(saved.B/30*100)+'%';
+    document.getElementById('bC').style.width = Math.round(saved.C/30*100)+'%';
+    document.getElementById('stotal').innerHTML = saved.total+'<span> / 100 pts</span>';
+    el_rated.style.display = 'inline-flex';
+  } else {
+    el_rated.style.display = 'none';
+  }
+
+  document.getElementById('btn-save').disabled = locked;
+  updateStatusBar();
+  checkDoneButton();
+}
+
+function setInputsLocked(locked) {
+  ['sA','sB','sC','notes'].forEach(function(id){
+    document.getElementById(id).disabled = locked;
+  });
+}
+function clearFields() {
+  ['sA','sB','sC'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['bA','bB','bC'].forEach(function(id){ document.getElementById(id).style.width='0%'; });
+  document.getElementById('notes').value = '';
+  document.getElementById('stotal').innerHTML = '\u2014<span> / 100 pts</span>';
+}
+
+// ── Save current presenter score ──────────────────────────────────────
+function saveScore() {
+  if (!activePan)             { toast('\u26A0 Select a panelist first.'); return; }
+  if (submitted[activePan])   { toast('\u26A0 '+activePan+' has already submitted all scores.'); return; }
+  var idx = parseInt(document.getElementById('pres-card').dataset.idx);
+  if (isNaN(idx))             { toast('\u26A0 No presenter loaded.'); return; }
+  var a=gv('sA'), b=gv('sB'), c=gv('sC');
+  if (a===null||b===null||c===null) { toast('\u26A0 Fill in all three sections.'); return; }
+
+  scores[activePan][idx] = {
+    A:a, B:b, C:c, total:a+b+c,
+    notes:(document.getElementById('notes').value||'').trim(),
+    ts:new Date().toISOString()
+  };
+  persist();
+  document.getElementById('already-rated').style.display = 'inline-flex';
+  updateStatusBar();
+  checkDoneButton();
+  toast('\u2713 Saved \u2014 '+DISPLAY[idx]+': '+(a+b+c)+'/100');
+
+  // If QR locked to one presenter, stay on it
+  // If free mode, auto-advance to next unrated
+  if (focusIdx < 0) {
+    var next = findNextUnrated(idx);
+    if (next >= 0) {
+      setTimeout(function(){ loadPresenter(next); }, 400);
+    }
+  }
+}
+
+function findNextUnrated(fromIdx) {
+  for (var i=fromIdx+1; i<NUM; i++) if (!scores[activePan][i]) return i;
+  for (var i=0; i<fromIdx; i++)     if (!scores[activePan][i]) return i;
+  return -1;
+}
+
+// ── Submit all (Done) ─────────────────────────────────────────────────
+function checkDoneButton() {
+  var btn = document.getElementById('btn-done');
+  if (!activePan || submitted[activePan]) { btn.style.display='none'; return; }
+  var rated = Object.keys(scores[activePan]||{}).length;
+  btn.style.display = (rated === NUM) ? 'inline-block' : 'none';
+}
+
+function submitAll() {
+  if (!activePan) return;
+  var rated = Object.keys(scores[activePan]).length;
+  if (rated < NUM) { toast('\u26A0 '+(NUM-rated)+' presenter(s) still unrated.'); return; }
+  if (!confirm('Submit all '+NUM+' scores for '+activePan+'?\n\nThis cannot be changed after submission.')) return;
+  submitted[activePan] = true;
+  persist();
+  buildDropdown();
+  document.getElementById('psel').value = activePan;
+  document.getElementById('psel').disabled = true;
+  setInputsLocked(true);
+  document.getElementById('btn-save').disabled = true;
+  document.getElementById('btn-done').style.display = 'none';
+  updateStatusBar();
+  toast('\u2713 '+activePan+' \u2014 all scores submitted! Hand device to next panelist.', 4500);
+}
+
+// ── Status bar ────────────────────────────────────────────────────────
+function updateStatusBar() {
+  var pill  = document.getElementById('spill');
+  var txt   = document.getElementById('stxt');
+  var fill  = document.getElementById('prog-fill');
+  var lbl   = document.getElementById('prog-lbl');
+  if (!activePan) {
+    pill.className='pill pill-w'; pill.textContent='Waiting';
+    txt.textContent='Select a panelist to begin';
+    fill.style.width='0%'; lbl.textContent='0 / '+NUM; return;
+  }
+  var rated = Object.keys(scores[activePan]||{}).length;
+  fill.style.width = Math.round(rated/NUM*100)+'%';
+  lbl.textContent  = rated+' / '+NUM;
+  if (submitted[activePan]) {
+    pill.className='pill pill-d'; pill.textContent='Submitted \u2713';
+    txt.textContent = activePan+' \u2014 all '+NUM+' presenters rated';
+  } else {
+    pill.className='pill pill-g'; pill.textContent='Grading';
+    txt.textContent = activePan+' \u2014 '+rated+'/'+NUM+' rated'+(focusIdx>=0?' (QR mode: scan next presenter to continue)':'');
+  }
+}
+
+// ── Deep-link: QR code sets ?p= param ────────────────────────────────
+function handleDeepLink() {
+  var params = new URLSearchParams(window.location.search);
+  var pid    = params.get('p');
+  if (!pid) return;
+  var idx = PRESENTERS.indexOf(pid);
+  if (idx < 0) return;
+  focusIdx = idx;
+  // Show QR banner
+  var banner = document.getElementById('qr-banner');
+  banner.style.display = 'flex';
+  document.getElementById('qr-pname').textContent = DISPLAY[idx];
+  // Load this presenter
+  loadPresenter(idx);
+}
+
+// ── Results ───────────────────────────────────────────────────────────
+function renderResults() {
+  var el = document.getElementById('res-content');
+  var done = PANELISTS.filter(function(p){ return submitted[p]; });
+  if (!done.length) {
+    el.innerHTML = '<div class="empty">No completed submissions yet.<br/>Each panelist must rate all '+NUM+' presenters and click <strong>\u2713 Done \u2014 Submit all scores</strong>.</div>';
+    return;
+  }
+  var chips = done.map(function(n){ return '<span class="chip">\u2713 '+n+'</span>'; }).join('');
+
+  var byPres = PRESENTERS.map(function(p,i){
+    var A=[],B=[],C=[],tot=[];
+    done.forEach(function(pan){
+      var s=scores[pan]&&scores[pan][i];
+      if(s){A.push(s.A);B.push(s.B);C.push(s.C);tot.push(s.total);}
+    });
+    return {name:DISPLAY[i],id:p,i:i,A:A,B:B,C:C,tot:tot};
+  });
+
+  var ranked = byPres.filter(function(x){return x.tot.length>0;})
+    .map(function(x){return{name:x.name,aA:avg(x.A),aB:avg(x.B),aC:avg(x.C),fin:avg(x.tot),cnt:x.tot.length};})
+    .sort(function(a,b){return (b.fin||0)-(a.fin||0);});
+
+  var medals=['gold','silver','bronze'];
+  var rRows = ranked.map(function(s,i){
+    return '<tr><td><span class="rbadge '+(medals[i]||'')+'">'+(i+1)+'</span></td>'+
+      '<td>'+s.name+'</td>'+
+      '<td style="text-align:center">'+(s.aA!=null?s.aA:'\u2014')+'</td>'+
+      '<td style="text-align:center">'+(s.aB!=null?s.aB:'\u2014')+'</td>'+
+      '<td style="text-align:center">'+(s.aC!=null?s.aC:'\u2014')+'</td>'+
+      '<td style="text-align:center;font-weight:700;color:var(--p)">'+(s.fin!=null?s.fin:'\u2014')+'</td>'+
+      '<td style="text-align:center;color:var(--t2)">'+s.cnt+'</td></tr>';
+  }).join('');
+
+  var details = byPres.filter(function(x){return x.tot.length>0;}).map(function(x){
+    var rows = done.map(function(pan){
+      var s=scores[pan]&&scores[pan][x.i]; if(!s) return '';
+      return '<tr><td>'+pan+'</td>'+
+        '<td style="text-align:center">'+s.A+'</td>'+
+        '<td style="text-align:center">'+s.B+'</td>'+
+        '<td style="text-align:center">'+s.C+'</td>'+
+        '<td style="text-align:center;font-weight:600;color:var(--p)">'+s.total+'</td>'+
+        '<td style="font-size:11px;color:var(--t2)">'+(s.notes||'')+'</td></tr>';
+    }).join('');
+    var ar = '<tr class="avg-row"><td>Average</td>'+
+      '<td style="text-align:center">'+(avg(x.A)||'\u2014')+'</td>'+
+      '<td style="text-align:center">'+(avg(x.B)||'\u2014')+'</td>'+
+      '<td style="text-align:center">'+(avg(x.C)||'\u2014')+'</td>'+
+      '<td style="text-align:center">'+(avg(x.tot)||'\u2014')+'</td><td></td></tr>';
+    return '<div class="res-card">'+
+      '<div class="res-hdr"><span>'+x.name+'</span><span style="opacity:.7;font-weight:400">'+x.tot.length+' vote'+(x.tot.length!==1?'s':'')+'</span></div>'+
+      '<div style="overflow-x:auto"><table class="tbl"><thead><tr>'+
+      '<th>Panelist</th><th style="text-align:center">S1/40</th><th style="text-align:center">S2/30</th>'+
+      '<th style="text-align:center">S3/30</th><th style="text-align:center">Total</th><th>Notes</th>'+
+      '</tr></thead><tbody>'+rows+ar+'</tbody></table></div></div>';
+  }).join('');
+
+  el.innerHTML =
+    '<div class="chips">'+chips+'</div>'+
+    '<div class="res-card"><div class="res-hdr">'+
+      '<span>Final ranking \u2014 averaged across '+done.length+' panelist'+(done.length!==1?'s':'')+'</span>'+
+    '</div><div style="overflow-x:auto"><table class="tbl"><thead><tr>'+
+    '<th>#</th><th>Presenter</th><th style="text-align:center">S1/40</th>'+
+    '<th style="text-align:center">S2/30</th><th style="text-align:center">S3/30</th>'+
+    '<th style="text-align:center">Final/100</th><th style="text-align:center">Votes</th>'+
+    '</tr></thead><tbody>'+rRows+'</tbody></table></div></div>'+
+    details+
+    '<div class="res-btns">'+
+      '<button class="btn-del" onclick="clearAll()">Clear all data</button>'+
+      '<button class="btn-exp" onclick="doExport()">Export results \u2197</button>'+
+    '</div>';
+}
+
+function clearAll() {
+  if (!confirm('Delete ALL scores? This cannot be undone.')) return;
+  scores={}; submitted={};
+  PANELISTS.forEach(function(p){scores[p]={};});
+  persist(); buildDropdown(); onPanelistChange();
+  toast('All data cleared.');
+  renderResults();
+}
+
+function doExport() {
+  var done=PANELISTS.filter(function(p){return submitted[p];});
+  if(!done.length){toast('No completed submissions yet.');return;}
+  var sep='\u2500'.repeat(76);
+  var lines=[
+    '\u2554'+'\u2550'.repeat(74)+'\u2557',
+    '  CONSOLIDATED PANEL EVALUATION RESULTS \u2014 CMP',
+    '\u255a'+'\u2550'.repeat(74)+'\u255d','',
+    '  Exported   : '+new Date().toLocaleString(),
+    '  Panelists  : '+done.join(', '),
+    '  Presenters : '+NUM,
+    '  Scoring    : S1=1\u201340 | S2=1\u201330 | S3=1\u201330 | Total=100',
+    '',sep,'ALL SUBMISSIONS',sep
+  ];
+  PRESENTERS.forEach(function(p,i){
+    done.forEach(function(pan){
+      var s=scores[pan]&&scores[pan][i];
+      if(s) lines.push('  '+DISPLAY[i].substring(0,26).padEnd(27)+pan.padEnd(20)+
+        'S1:'+String(s.A).padEnd(4)+'S2:'+String(s.B).padEnd(4)+'S3:'+String(s.C).padEnd(4)+
+        'Total:'+s.total+(s.notes?' | '+s.notes:''));
+    });
+  });
+  var byP=PRESENTERS.map(function(p,i){
+    var A=[],B=[],C=[],tot=[];
+    done.forEach(function(pan){var s=scores[pan]&&scores[pan][i];if(s){A.push(s.A);B.push(s.B);C.push(s.C);tot.push(s.total);}});
+    return{name:DISPLAY[i],aA:avg(A),aB:avg(B),aC:avg(C),fin:avg(tot),cnt:tot.length};
+  }).filter(function(x){return x.cnt>0;}).sort(function(a,b){return(b.fin||0)-(a.fin||0);});
+  lines.push('','',sep,'FINAL RANKING',sep,
+    '#'.padEnd(4)+'Presenter'.padEnd(28)+'S1/40'.padEnd(10)+'S2/30'.padEnd(10)+'S3/30'.padEnd(10)+'Avg/100'.padEnd(10)+'Votes',sep);
+  byP.forEach(function(s,i){
+    lines.push(String(i+1).padEnd(4)+s.name.substring(0,26).padEnd(28)+
+      String(s.aA||'-').padEnd(10)+String(s.aB||'-').padEnd(10)+
+      String(s.aC||'-').padEnd(10)+String(s.fin||'-').padEnd(10)+s.cnt);
+  });
+  var blob=new Blob([lines.join('\n')],{type:'text/plain'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='panel_eval_results.txt';a.click();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────
+restore();
+buildDropdown();
+handleDeepLink();
+updateStatusBar();
+
+</script>
+</body>
+</html>
